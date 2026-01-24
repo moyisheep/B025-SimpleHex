@@ -20,6 +20,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="Fonts\AlibabaPuHuiTi-3-55-Regular.ttf" />
+    <CopyFileToFolders Include="Fonts\AlibabaPuHuiTi-3-55-Regular.ttf">
+      <Filter>资源文件</Filter>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
