@@ -24,6 +24,12 @@
     <ClCompile Include="FileData.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="HexViewer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UIUtils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Fonts\AlibabaPuHuiTi-3-55-Regular.ttf">
@@ -38,6 +44,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="FileData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HexViewer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UIUtils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorConst.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

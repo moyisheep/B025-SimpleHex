@@ -145,8 +145,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FileData.cpp" />
+    <ClCompile Include="HexViewer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
+    <ClCompile Include="UIUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Fonts\AlibabaPuHuiTi-3-55-Regular.ttf">
@@ -155,9 +157,12 @@
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ColorConst.h" />
     <ClInclude Include="FileData.h" />
+    <ClInclude Include="HexViewer.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="TextRenderer.h" />
+    <ClInclude Include="UIUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

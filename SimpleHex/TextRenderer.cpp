@@ -5,6 +5,12 @@ TextRenderer::TextRenderer(SDL_Renderer* renderer)
     : renderer(renderer), fontRegular(nullptr), fontBold(nullptr), fontMono(nullptr) {}
 
 TextRenderer::~TextRenderer() {
+    // 清理纹理缓存
+    for (auto& [key, entry] : textureCache) {
+        SDL_DestroyTexture(entry.texture);
+    }
+    textureCache.clear();
+
     for (auto& [key, font] : fontCache) {
         if (font) TTF_CloseFont(font);
     }
@@ -63,26 +69,112 @@ bool TextRenderer::init() {
     return fontRegular != nullptr;
 }
 
+// 核心优化：修改render函数
 void TextRenderer::render(const std::string& text, int x, int y, SDL_Color color,
     TTF_Font* font, bool isMono) {
     TTF_Font* useFont = font ? font : (isMono ? fontMono : fontRegular);
     if (!useFont) return;
 
-    SDL_Surface* surface = TTF_RenderUTF8_Blended(useFont, text.c_str(), color);
-    if (!surface) return;
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (!texture) {
-        SDL_FreeSurface(surface);
-        return;
+    // 定期清理缓存
+    Uint32 currentTime = SDL_GetTicks();
+    if (currentTime - lastCleanupTime > CLEANUP_INTERVAL) {
+        cleanupCache();
+        lastCleanupTime = currentTime;
     }
 
-    SDL_Rect dstRect = { x, y, surface->w, surface->h };
-    SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
+    // 尝试从缓存获取纹理
+    SDL_Texture* texture = getFromCache(text, color, useFont);
+    int w = 0, h = 0;
 
-    SDL_DestroyTexture(texture);
-    SDL_FreeSurface(surface);
+    if (texture) {
+        // 从缓存命中，获取尺寸
+        SDL_QueryTexture(texture, nullptr, nullptr, &w, &h);
+    }
+    else {
+        // 缓存未命中，创建新纹理
+        SDL_Surface* surface = TTF_RenderUTF8_Blended(useFont, text.c_str(), color);
+        if (!surface) return;
+
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        if (!texture) {
+            SDL_FreeSurface(surface);
+            return;
+        }
+
+        w = surface->w;
+        h = surface->h;
+
+        // 添加到缓存
+        addToCache(text, color, useFont, texture, w, h);
+
+        SDL_FreeSurface(surface);
+    }
+
+    SDL_Rect dstRect = { x, y, w, h };
+    SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
 }
+
+void TextRenderer::cleanupCache() {
+    Uint32 currentTime = SDL_GetTicks();
+
+    // 只清理超过60秒未使用的纹理
+    auto it = textureCache.begin();
+    while (it != textureCache.end()) {
+        if (currentTime - it->second.lastUsedTime > 60000) { // 60秒
+            SDL_DestroyTexture(it->second.texture);
+            it = textureCache.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+// 修改addToCache，添加前检查缓存大小
+void TextRenderer::addToCache(const std::string& text, SDL_Color color,
+    TTF_Font* font, SDL_Texture* texture, int w, int h) {
+    // 添加前如果缓存已满，进行一次清理
+    if (textureCache.size() >= MAX_CACHE_SIZE) {
+        cleanupCache();
+    }
+
+    TextureKey key{ text, color, font };
+    textureCache[key] = { texture, w, h, SDL_GetTicks() };
+}
+
+SDL_Texture* TextRenderer::getFromCache(const std::string& text, SDL_Color color, TTF_Font* font) {
+    TextureKey key{ text, color, font };
+    auto it = textureCache.find(key);
+    if (it != textureCache.end()) {
+        it->second.lastUsedTime = SDL_GetTicks(); // 更新使用时间
+        return it->second.texture;
+    }
+    return nullptr;
+}
+
+// 优化createTextTexture，也使用缓存
+SDL_Texture* TextRenderer::createTextTexture(const std::string& text, SDL_Color color,
+    TTF_Font* font) {
+    TTF_Font* useFont = font ? font : fontRegular;
+    if (!useFont) return nullptr;
+
+    // 尝试从缓存获取
+    SDL_Texture* texture = getFromCache(text, color, useFont);
+    if (texture) return texture;
+
+    // 创建新纹理
+    SDL_Surface* surface = TTF_RenderUTF8_Blended(useFont, text.c_str(), color);
+    if (!surface) return nullptr;
+
+    texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (texture) {
+        addToCache(text, color, useFont, texture, surface->w, surface->h);
+    }
+
+    SDL_FreeSurface(surface);
+    return texture;
+}
+
 
 void TextRenderer::renderWithShadow(const std::string& text, int x, int y, SDL_Color color,
     int shadowOffset) {
@@ -101,18 +193,7 @@ SDL_Point TextRenderer::getSize(const std::string& text, TTF_Font* font) {
     return size;
 }
 
-SDL_Texture* TextRenderer::createTextTexture(const std::string& text, SDL_Color color,
-    TTF_Font* font) {
-    TTF_Font* useFont = font ? font : fontRegular;
-    if (!useFont) return nullptr;
 
-    SDL_Surface* surface = TTF_RenderUTF8_Blended(useFont, text.c_str(), color);
-    if (!surface) return nullptr;
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-    return texture;
-}
 
 bool TextRenderer::isAvailable() const {
     return fontRegular != nullptr;
