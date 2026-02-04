@@ -22,6 +22,8 @@
 #include <chrono>
 #include <thread>
 
+#include "TextRenderer.h"
+#include "FileData.h"
 namespace fs = std::filesystem;
 
 // 常量定义
@@ -90,54 +92,8 @@ struct Highlight {
     }
 };
 
-// 文件数据类
-class FileData {
-private:
-    std::vector<uint8_t> data;
-    std::string filepath;
-    std::string filename;
-    size_t filesize;
 
-public:
-    FileData();
-    bool load(const std::string& path);
-    bool loadFromMemory(const std::vector<uint8_t>& newData);
-    size_t size() const;
-    uint8_t operator[](size_t index) const;
-    std::string getFilePath() const;
-    std::string getFileName() const;
-    std::string getFileSizeFormatted() const;
-    std::vector<uint8_t> getDataSlice(size_t start, size_t end) const;
-    std::string getHexString(size_t start, size_t length) const;
-    std::string getAsciiString(size_t start, size_t length) const;
-};
 
-// 文本渲染器
-class TextRenderer {
-private:
-    TTF_Font* fontRegular;
-    TTF_Font* fontBold;
-    TTF_Font* fontMono;
-    SDL_Renderer* renderer;
-    std::map<std::pair<std::string, int>, TTF_Font*> fontCache;
-
-public:
-    TextRenderer(SDL_Renderer* renderer);
-    ~TextRenderer();
-
-    bool init();
-    void render(const std::string& text, int x, int y, SDL_Color color,
-        TTF_Font* font = nullptr, bool isMono = false);
-    void renderWithShadow(const std::string& text, int x, int y, SDL_Color color,
-        int shadowOffset = 1);
-    SDL_Point getSize(const std::string& text, TTF_Font* font = nullptr);
-    SDL_Texture* createTextTexture(const std::string& text, SDL_Color color,
-        TTF_Font* font = nullptr);
-    bool isAvailable() const;
-
-    TTF_Font* getRegularFont() const { return fontRegular; }
-    TTF_Font* getMonoFont() const { return fontMono; }
-};
 
 // UI工具类
 class UIUtils {

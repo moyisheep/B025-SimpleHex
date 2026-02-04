@@ -1,207 +1,5 @@
 #include "main.h"
 
-// ==================== FileData 实现 ====================
-FileData::FileData() : filesize(0) {}
-
-bool FileData::load(const std::string& path) {
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file) {
-        std::cerr << "无法打开文件: " << path << std::endl;
-        return false;
-    }
-
-    filesize = static_cast<size_t>(file.tellg());
-    file.seekg(0, std::ios::beg);
-
-    data.resize(filesize);
-    if (!file.read(reinterpret_cast<char*>(data.data()), filesize)) {
-        std::cerr << "读取文件失败: " << path << std::endl;
-        data.clear();
-        filesize = 0;
-        return false;
-    }
-
-    filepath = path;
-    filename = fs::path(path).filename().string();
-
-    std::cout << "文件加载成功: " << filename
-        << " (" << filesize << " 字节)" << std::endl;
-    return true;
-}
-
-bool FileData::loadFromMemory(const std::vector<uint8_t>& newData) {
-    data = newData;
-    filesize = data.size();
-    filepath = "";
-    filename = "内存数据";
-    return true;
-}
-
-size_t FileData::size() const {
-    return filesize;
-}
-
-uint8_t FileData::operator[](size_t index) const {
-    return index < filesize ? data[index] : 0;
-}
-
-std::string FileData::getFilePath() const {
-    return filepath;
-}
-
-std::string FileData::getFileName() const {
-    return filename;
-}
-
-std::string FileData::getFileSizeFormatted() const {
-    return UIUtils::formatFileSize(filesize);
-}
-
-std::vector<uint8_t> FileData::getDataSlice(size_t start, size_t end) const {
-    if (start >= filesize || end > filesize || start >= end) {
-        return {};
-    }
-    return std::vector<uint8_t>(data.begin() + start, data.begin() + end);
-}
-
-std::string FileData::getHexString(size_t start, size_t length) const {
-    std::stringstream ss;
-    size_t end = std::min(start + length, filesize);
-    for (size_t i = start; i < end; i++) {
-        ss << std::hex << std::uppercase << std::setw(2) << std::setfill('0')
-            << static_cast<int>(data[i]) << " ";
-    }
-    return ss.str();
-}
-
-std::string FileData::getAsciiString(size_t start, size_t length) const {
-    std::string result;
-    size_t end = std::min(start + length, filesize);
-    for (size_t i = start; i < end; i++) {
-        char c = static_cast<char>(data[i]);
-        result.push_back((c >= 32 && c <= 126) ? c : '.');
-    }
-    return result;
-}
-
-// ==================== TextRenderer 实现 ====================
-TextRenderer::TextRenderer(SDL_Renderer* renderer)
-    : renderer(renderer), fontRegular(nullptr), fontBold(nullptr), fontMono(nullptr) {}
-
-TextRenderer::~TextRenderer() {
-    for (auto& [key, font] : fontCache) {
-        if (font) TTF_CloseFont(font);
-    }
-    fontCache.clear();
-
-    if (fontRegular) TTF_CloseFont(fontRegular);
-    if (fontBold) TTF_CloseFont(fontBold);
-    if (fontMono) TTF_CloseFont(fontMono);
-    TTF_Quit();
-}
-
-bool TextRenderer::init() {
-    if (TTF_Init() == -1) {
-        std::cerr << "TTF初始化失败: " << TTF_GetError() << std::endl;
-        return false;
-    }
-
-    // 尝试加载不同字体
-    const char* fontPaths[] = {
-        "C:\\Windows\\Fonts\\msyh.ttc",           // 微软雅黑
-        "C:\\Windows\\Fonts\\segoeui.ttf",        // Segoe UI
-        "C:\\Windows\\Fonts\\arial.ttf",          // Arial
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", // Linux
-        "/System/Library/Fonts/SFNS.ttf",         // macOS
-        nullptr
-    };
-
-    const char* monoPaths[] = {
-        "C:\\Windows\\Fonts\\consola.ttf",        // Consola
-        "C:\\Windows\\Fonts\\lucon.ttf",          // Lucida Console
-        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
-        nullptr
-    };
-
-    // 加载常规字体
-    for (int i = 0; fontPaths[i]; i++) {
-        if (fs::exists(fontPaths[i])) {
-            fontRegular = TTF_OpenFont(fontPaths[i], 16);
-            if (fontRegular) break;
-        }
-    }
-
-    // 加载等宽字体
-    for (int i = 0; monoPaths[i]; i++) {
-        if (fs::exists(monoPaths[i])) {
-            fontMono = TTF_OpenFont(monoPaths[i], 14);
-            if (fontMono) break;
-        }
-    }
-
-    // 如果没找到等宽字体，使用常规字体
-    if (!fontMono && fontRegular) {
-        fontMono = fontRegular;
-    }
-
-    return fontRegular != nullptr;
-}
-
-void TextRenderer::render(const std::string& text, int x, int y, SDL_Color color,
-    TTF_Font* font, bool isMono) {
-    TTF_Font* useFont = font ? font : (isMono ? fontMono : fontRegular);
-    if (!useFont) return;
-
-    SDL_Surface* surface = TTF_RenderUTF8_Blended(useFont, text.c_str(), color);
-    if (!surface) return;
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (!texture) {
-        SDL_FreeSurface(surface);
-        return;
-    }
-
-    SDL_Rect dstRect = { x, y, surface->w, surface->h };
-    SDL_RenderCopy(renderer, texture, nullptr, &dstRect);
-
-    SDL_DestroyTexture(texture);
-    SDL_FreeSurface(surface);
-}
-
-void TextRenderer::renderWithShadow(const std::string& text, int x, int y, SDL_Color color,
-    int shadowOffset) {
-    // 绘制阴影
-    render(text, x + shadowOffset, y + shadowOffset, { 0, 0, 0, 150 });
-    // 绘制前景文字
-    render(text, x, y, color);
-}
-
-SDL_Point TextRenderer::getSize(const std::string& text, TTF_Font* font) {
-    SDL_Point size = { 0, 0 };
-    TTF_Font* useFont = font ? font : fontRegular;
-    if (!useFont) return size;
-
-    TTF_SizeUTF8(useFont, text.c_str(), &size.x, &size.y);
-    return size;
-}
-
-SDL_Texture* TextRenderer::createTextTexture(const std::string& text, SDL_Color color,
-    TTF_Font* font) {
-    TTF_Font* useFont = font ? font : fontRegular;
-    if (!useFont) return nullptr;
-
-    SDL_Surface* surface = TTF_RenderUTF8_Blended(useFont, text.c_str(), color);
-    if (!surface) return nullptr;
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
-    return texture;
-}
-
-bool TextRenderer::isAvailable() const {
-    return fontRegular != nullptr;
-}
-
 // ==================== UIUtils 实现 ====================
 void UIUtils::drawRoundedRect(SDL_Renderer* renderer, SDL_Rect rect, int radius, SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
@@ -660,7 +458,7 @@ void HexViewer::renderStatusBar() {
 
     if (isFileLoaded()) {
         statusText << "文件: " << fileData.getFileName()
-            << " | 大小: " << fileData.getFileSizeFormatted()
+            << " | 大小: " << UIUtils::formatFileSize(fileData.size())
             << " | 偏移: 0x" << std::hex << std::uppercase
             << scrollOffset * BYTES_PER_LINE;
 
@@ -943,7 +741,7 @@ void HexViewer::render() {
     // 绘制标题
     std::string title = "十六进制阅读器";
     if (isFileLoaded()) {
-        title += " - " + fileData.getFileName() + " (" + fileData.getFileSizeFormatted() + ")";
+        title += " - " + fileData.getFileName() + " (" + UIUtils::formatFileSize(fileData.size()) + ")";
     }
     textRenderer->renderWithShadow(title, UI_PADDING, 20, COLOR_TEXT_MAIN);
 
@@ -1341,7 +1139,7 @@ std::string HexViewer::getStatusText() const {
 
     if (isFileLoaded()) {
         ss << "文件: " << fileData.getFileName()
-            << " | 大小: " << fileData.getFileSizeFormatted()
+            << " | 大小: " << UIUtils::formatFileSize(fileData.size())
             << " | 偏移: 0x" << std::hex << std::uppercase << scrollOffset * BYTES_PER_LINE;
 
         if (hasSelection) {
