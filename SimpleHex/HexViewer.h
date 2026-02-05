@@ -64,11 +64,14 @@ private:
     int scrollbarDragStartY;
     int scrollbarStartOffset;
 
+    bool needRefresh;
+
     // 选择状态
     size_t selectionStart;
     size_t selectionEnd;
     bool isSelecting;
     bool hasSelection;
+
 
     // 标记管理
     std::vector<Highlight> highlights;
@@ -133,6 +136,7 @@ public:
     void render();
     void handleEvent(SDL_Event& event);
     void cleanup();
+    void refresh();
 
     // Getter/Setter
     bool isFileLoaded() const { return fileData.size() > 0; }

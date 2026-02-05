@@ -10,7 +10,7 @@ HexViewer::HexViewer()
     isEditingDescription(false), isFileDraggedOver(false),
     mouseX(0), mouseY(0), isMouseOverHex(false), hoveredByte(SIZE_MAX),
     isRunning(true), zoomLevel(1.0f), showAscii(true), showHex(true),
-    fps(60.0f) {
+    fps(60.0f), needRefresh(false) {
 
     descriptionInputRect = { UI_PADDING, WINDOW_HEIGHT - 50, 300, 35 };
     addButtonRect = { UI_PADDING + 310, WINDOW_HEIGHT - 50, 100, 35 };
@@ -776,6 +776,7 @@ void HexViewer::handleEvent(SDL_Event& event) {
             addButtonRect.y = windowHeight - 50;
             clearButtonRect.y = windowHeight - 50;
             dropHighlightRect = { 0, 0, windowWidth, windowHeight };
+            refresh();
         }
         break;
 
@@ -792,7 +793,9 @@ void HexViewer::handleEvent(SDL_Event& event) {
             int lineDelta = static_cast<int>(dragRatio * totalLines);
             scrollOffset = std::max(0, std::min(totalLines - visibleLines,
                 scrollbarStartOffset + lineDelta));
+            
         }
+        refresh();
         break;
 
     case SDL_MOUSEBUTTONDOWN:
@@ -872,6 +875,7 @@ void HexViewer::handleEvent(SDL_Event& event) {
             scrollOffset -= event.wheel.y * 3;
             int maxScroll = std::max(0, totalLines - visibleLines);
             scrollOffset = std::max(0, std::min(maxScroll, scrollOffset));
+            refresh();
         }
         break;
 
@@ -948,6 +952,7 @@ void HexViewer::handleEvent(SDL_Event& event) {
         draggedFilePath = event.drop.file;
         if (loadFile(draggedFilePath)) {
             std::cout << "拖拽文件加载成功: " << draggedFilePath << std::endl;
+            refresh();
         }
         SDL_free(event.drop.file);
         isFileDraggedOver = false;
@@ -979,13 +984,18 @@ void HexViewer::run() {
     std::cout << "  5. 使用 Ctrl+F 搜索文本" << std::endl;
     std::cout << "  6. 使用 Ctrl+Shift+F 搜索十六进制" << std::endl;
     std::cout << "  7. 使用 Ctrl+G 跳转到偏移" << std::endl;
-
+    refresh();
     while (isRunning) {
         while (SDL_PollEvent(&event)) {
             handleEvent(event);
         }
 
-        render();
+        if(needRefresh)
+        {
+            render();
+            needRefresh = false;
+        }
+
 
         // 控制帧率
         std::this_thread::sleep_for(std::chrono::milliseconds(16)); // ~60FPS
@@ -1010,6 +1020,11 @@ void HexViewer::cleanup() {
 
     SDL_Quit();
     std::cout << "应用程序已清理" << std::endl;
+}
+
+void HexViewer::refresh()
+{
+    needRefresh = true;
 }
 
 std::string HexViewer::getStatusText() const {
