@@ -558,7 +558,7 @@ void HexViewer::renderByteCell(int x, int y, size_t byteIndex, uint8_t byte) {
     hexStream << std::hex << std::uppercase << std::setw(2)
         << std::setfill('0') << static_cast<int>(byte);
 
-    SDL_Color hexColor = isSelected ? COLOR_TEXT_MAIN :
+    SDL_Color hexColor = isSelected ?   COLOR_TEXT_MAIN :
         (isHovered ? COLOR_ACCENT_BLUE : COLOR_TEXT_SECONDARY);
 
     if (cellHighlight) {
@@ -570,8 +570,8 @@ void HexViewer::renderByteCell(int x, int y, size_t byteIndex, uint8_t byte) {
 
     // 绘制ASCII字符
     char asciiChar = (byte >= 32 && byte <= 126) ? static_cast<char>(byte) : '.';
-    SDL_Color asciiColor = isSelected ? COLOR_TEXT_MAIN :
-        (isHovered ? COLOR_ACCENT_GREEN : COLOR_TEXT_SECONDARY);
+    SDL_Color asciiColor = isSelected ?  COLOR_ACCENT_GREEN :
+        (isHovered ? COLOR_TEXT_MAIN : COLOR_TEXT_SECONDARY);
 
     if (cellHighlight) {
         asciiColor = cellHighlight->color;
@@ -795,6 +795,24 @@ void HexViewer::handleEvent(SDL_Event& event) {
                 scrollbarStartOffset + lineDelta));
             
         }
+        if (isFileLoaded() && mouseX >= HEX_VIEW_X &&
+            mouseX <= WINDOW_WIDTH - SCROLLBAR_WIDTH - UI_PADDING - 280 &&
+            mouseY >= HEX_VIEW_Y && mouseY <= WINDOW_HEIGHT - UI_PADDING * 2 - 50) {
+
+            size_t byteIndex = getByteIndexAt(mouseX, mouseY);
+            if (byteIndex < fileData.size()) 
+            {
+                if (isSelecting) {
+   
+                    selectionEnd = byteIndex;
+                    if(selectionEnd < selectionStart)
+                    {
+                        std::swap(selectionStart, selectionEnd);
+                    }
+                }
+                
+            }
+        }
         refresh();
         break;
 
@@ -866,6 +884,7 @@ void HexViewer::handleEvent(SDL_Event& event) {
                 if (selectionEnd < selectionStart) {
                     std::swap(selectionStart, selectionEnd);
                 }
+                refresh();
             }
         }
         break;
