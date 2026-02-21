@@ -18,42 +18,5 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="TextRenderer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="FileData.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="HexViewer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="UIUtils.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="Fonts\AlibabaPuHuiTi-3-55-Regular.ttf">
-      <Filter>资源文件</Filter>
-    </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="main.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="TextRenderer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="FileData.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="HexViewer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="UIUtils.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ColorConst.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
