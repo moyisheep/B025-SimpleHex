@@ -8,18 +8,18 @@
 // ===================== 数据管理器 =====================
 class HexData {
 private:
-    std::vector<uint8_t> data_;
-    size_t pageSize_;
+    std::vector<uint8_t> m_data;
+    size_t m_pageSize;
 
 public:
-    HexData() : pageSize_(65536) {}
+    HexData() : m_pageSize(65536) {}
 
     bool LoadFromFile(const wxString& filename); 
 
-    void Clear() { data_.clear(); }
-    bool IsEmpty() const { return data_.empty(); }
-    size_t Size() const { return data_.size(); }
-    const uint8_t* Data() const { return data_.data(); }
+    void Clear() { m_data.clear(); }
+    bool IsEmpty() const { return m_data.empty(); }
+    size_t Size() const { return m_data.size(); }
+    const uint8_t* Data() const { return m_data.data(); }
 
     uint8_t GetByte(size_t offset) const; 
 

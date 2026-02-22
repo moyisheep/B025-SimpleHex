@@ -5,9 +5,9 @@ std::pair<wxString, wxString> HexData::GetLine(size_t offset, int bytesPerLine) 
     wxString hexStr, asciiStr;
     for (int i = 0; i < bytesPerLine; i++) {
         size_t pos = offset + i;
-        if (pos >= data_.size()) break;
+        if (pos >= m_data.size()) break;
 
-        uint8_t byte = data_[pos];
+        uint8_t byte = m_data[pos];
         hexStr += wxString::Format(wxT("%02X "), byte);
 
         if (byte >= 32 && byte <= 126) {
@@ -22,7 +22,7 @@ std::pair<wxString, wxString> HexData::GetLine(size_t offset, int bytesPerLine) 
 
 uint8_t HexData::GetByte(size_t offset) const
 {
-    return offset < data_.size() ? data_[offset] : 0;
+    return offset < m_data.size() ? m_data[offset] : 0;
 }
 
 bool HexData::LoadFromFile(const wxString& filename)
@@ -40,6 +40,6 @@ bool HexData::LoadFromFile(const wxString& filename)
         return false;
     }
 
-    data_.resize(size);
-    return file.Read(data_.data(), size) == size;
+    m_data.resize(size);
+    return file.Read(m_data.data(), size) == size;
 }

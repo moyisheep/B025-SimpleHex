@@ -1,6 +1,6 @@
 #include "HexFrame.h"
 
-AncientHexFrame::AncientHexFrame(const wxString& title)
+HexFrame::HexFrame(const wxString& title)
     : wxFrame(nullptr, wxID_ANY, title,
         wxDefaultPosition, wxSize(1000, 700)) {
 
@@ -19,26 +19,26 @@ AncientHexFrame::AncientHexFrame(const wxString& title)
     Show(true);
 }
 
-void AncientHexFrame::CreateUI()
+void HexFrame::CreateUI()
 {
     // 主面板
     wxPanel* panel = new wxPanel(this, wxID_ANY);
     panel->SetBackgroundColour(AncientColors::RICE_PAPER);
 
     // 十六进制视图
-    hexView_ = new AncientHexView(panel);
-    hexView_->SetBackgroundColour(AncientColors::RICE_PAPER);
+    m_hexView = new HexView(panel);
+    m_hexView->SetBackgroundColour(AncientColors::RICE_PAPER);
 
     // 工具栏
     CreateToolBar(panel);
 
     // 布局
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(hexView_, 1, wxEXPAND | wxALL, 10);
+    sizer->Add(m_hexView, 1, wxEXPAND | wxALL, 10);
     panel->SetSizer(sizer);
 }
 
-void AncientHexFrame::CreateToolBar(wxWindow* parent)
+void HexFrame::CreateToolBar(wxWindow* parent)
 {
     wxToolBar* toolbar = wxFrame::CreateToolBar();
     //wxPanel* toolbar = new wxPanel(parent, wxID_ANY);
@@ -51,64 +51,64 @@ void AncientHexFrame::CreateToolBar(wxWindow* parent)
     // 创建"打开"按钮
     wxButton* btnOpen = new wxButton(toolbar, wxID_ANY, wxT("打开"),
         wxDefaultPosition, wxSize(80, 30));
-    btnOpen->SetFont(fonts_.Secondary());
+    btnOpen->SetFont(m_fonts.Secondary());
     btnOpen->SetBackgroundColour(AncientColors::CELADON_MID);
     btnOpen->SetForegroundColour(AncientColors::INK_BLACK);
-    btnOpen->Bind(wxEVT_BUTTON, &AncientHexFrame::OnOpen, this);
+    btnOpen->Bind(wxEVT_BUTTON, &HexFrame::OnOpen, this);
     toolSizer->Add(btnOpen, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 
     // 创建"8字节"按钮
     wxButton* btn8Bytes = new wxButton(toolbar, wxID_ANY, wxT("8字节"),
         wxDefaultPosition, wxSize(80, 30));
-    btn8Bytes->SetFont(fonts_.Secondary());
+    btn8Bytes->SetFont(m_fonts.Secondary());
     btn8Bytes->SetBackgroundColour(AncientColors::CELADON_MID);
     btn8Bytes->SetForegroundColour(AncientColors::INK_BLACK);
-    btn8Bytes->Bind(wxEVT_BUTTON, &AncientHexFrame::OnBytes8, this);
+    btn8Bytes->Bind(wxEVT_BUTTON, &HexFrame::OnBytes8, this);
     toolSizer->Add(btn8Bytes, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 
     // 创建"16字节"按钮
     wxButton* btn16Bytes = new wxButton(toolbar, wxID_ANY, wxT("16字节"),
         wxDefaultPosition, wxSize(80, 30));
-    btn16Bytes->SetFont(fonts_.Secondary());
+    btn16Bytes->SetFont(m_fonts.Secondary());
     btn16Bytes->SetBackgroundColour(AncientColors::CELADON_MID);
     btn16Bytes->SetForegroundColour(AncientColors::INK_BLACK);
-    btn16Bytes->Bind(wxEVT_BUTTON, &AncientHexFrame::OnBytes16, this);
+    btn16Bytes->Bind(wxEVT_BUTTON, &HexFrame::OnBytes16, this);
     toolSizer->Add(btn16Bytes, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 
     // 创建"24字节"按钮
     wxButton* btn24Bytes = new wxButton(toolbar, wxID_ANY, wxT("24字节"),
         wxDefaultPosition, wxSize(80, 30));
-    btn24Bytes->SetFont(fonts_.Secondary());
+    btn24Bytes->SetFont(m_fonts.Secondary());
     btn24Bytes->SetBackgroundColour(AncientColors::CELADON_MID);
     btn24Bytes->SetForegroundColour(AncientColors::INK_BLACK);
-    btn24Bytes->Bind(wxEVT_BUTTON, &AncientHexFrame::OnBytes24, this);
+    btn24Bytes->Bind(wxEVT_BUTTON, &HexFrame::OnBytes24, this);
     toolSizer->Add(btn24Bytes, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 
     // 创建"32字节"按钮
     wxButton* btn32Bytes = new wxButton(toolbar, wxID_ANY, wxT("32字节"),
         wxDefaultPosition, wxSize(80, 30));
-    btn32Bytes->SetFont(fonts_.Secondary());
+    btn32Bytes->SetFont(m_fonts.Secondary());
     btn32Bytes->SetBackgroundColour(AncientColors::CELADON_MID);
     btn32Bytes->SetForegroundColour(AncientColors::INK_BLACK);
-    btn32Bytes->Bind(wxEVT_BUTTON, &AncientHexFrame::OnBytes32, this);
+    btn32Bytes->Bind(wxEVT_BUTTON, &HexFrame::OnBytes32, this);
     toolSizer->Add(btn32Bytes, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
 
     // 创建"字体+"按钮
     wxButton* btnFontPlus = new wxButton(toolbar, wxID_ANY, wxT("字体+"),
         wxDefaultPosition, wxSize(80, 30));
-    btnFontPlus->SetFont(fonts_.Secondary());
+    btnFontPlus->SetFont(m_fonts.Secondary());
     btnFontPlus->SetBackgroundColour(AncientColors::CELADON_MID);
     btnFontPlus->SetForegroundColour(AncientColors::INK_BLACK);
-    btnFontPlus->Bind(wxEVT_BUTTON, &AncientHexFrame::OnFontPlus, this);
+    btnFontPlus->Bind(wxEVT_BUTTON, &HexFrame::OnFontPlus, this);
     toolSizer->Add(btnFontPlus, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
 
     // 创建"字体-"按钮
     wxButton* btnFontMinus = new wxButton(toolbar, wxID_ANY, wxT("字体-"),
         wxDefaultPosition, wxSize(80, 30));
-    btnFontMinus->SetFont(fonts_.Secondary());
+    btnFontMinus->SetFont(m_fonts.Secondary());
     btnFontMinus->SetBackgroundColour(AncientColors::CELADON_MID);
     btnFontMinus->SetForegroundColour(AncientColors::INK_BLACK);
-    btnFontMinus->Bind(wxEVT_BUTTON, &AncientHexFrame::OnFontMinus, this);
+    btnFontMinus->Bind(wxEVT_BUTTON, &HexFrame::OnFontMinus, this);
     toolSizer->Add(btnFontMinus, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
 
     // 为所有按钮添加悬停效果
@@ -137,7 +137,7 @@ void AncientHexFrame::CreateToolBar(wxWindow* parent)
     // 添加标题
     wxStaticText* title = new wxStaticText(toolbar, wxID_ANY,
         wxT("古风十六进制查看器"));
-    title->SetFont(fonts_.Decorative());
+    title->SetFont(m_fonts.Decorative());
     title->SetForegroundColour(AncientColors::CELADON_DARK);
     toolSizer->Add(title, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
 
@@ -146,7 +146,7 @@ void AncientHexFrame::CreateToolBar(wxWindow* parent)
 
 }
 
-void AncientHexFrame::CreateMenu()
+void HexFrame::CreateMenu()
 {
     wxMenuBar* menuBar = new wxMenuBar();
     menuBar->SetBackgroundColour(AncientColors::CELADON_LIGHT);
@@ -176,15 +176,15 @@ void AncientHexFrame::CreateMenu()
     SetMenuBar(menuBar);
 
     // 绑定菜单事件
-    Bind(wxEVT_MENU, &AncientHexFrame::OnOpen, this, wxID_OPEN);
-    Bind(wxEVT_MENU, &AncientHexFrame::OnExit, this, wxID_EXIT);
-    Bind(wxEVT_MENU, &AncientHexFrame::OnAbout, this, wxID_ABOUT);
-    Bind(wxEVT_MENU, &AncientHexFrame::OnBytes8, this, 1001);
-    Bind(wxEVT_MENU, &AncientHexFrame::OnBytes16, this, 1002);
-    Bind(wxEVT_MENU, &AncientHexFrame::OnBytes24, this, 1003);
-    Bind(wxEVT_MENU, &AncientHexFrame::OnBytes32, this, 1004);
-    Bind(wxEVT_MENU, &AncientHexFrame::OnFontPlus, this, 1005);
-    Bind(wxEVT_MENU, &AncientHexFrame::OnFontMinus, this, 1006);
+    Bind(wxEVT_MENU, &HexFrame::OnOpen, this, wxID_OPEN);
+    Bind(wxEVT_MENU, &HexFrame::OnExit, this, wxID_EXIT);
+    Bind(wxEVT_MENU, &HexFrame::OnAbout, this, wxID_ABOUT);
+    Bind(wxEVT_MENU, &HexFrame::OnBytes8, this, 1001);
+    Bind(wxEVT_MENU, &HexFrame::OnBytes16, this, 1002);
+    Bind(wxEVT_MENU, &HexFrame::OnBytes24, this, 1003);
+    Bind(wxEVT_MENU, &HexFrame::OnBytes32, this, 1004);
+    Bind(wxEVT_MENU, &HexFrame::OnFontPlus, this, 1005);
+    Bind(wxEVT_MENU, &HexFrame::OnFontMinus, this, 1006);
 
     // 快捷键
     wxAcceleratorEntry entries[] = {
@@ -200,18 +200,18 @@ void AncientHexFrame::CreateMenu()
     SetAcceleratorTable(accel);
 }
 
-void AncientHexFrame::CreateStatusBar()
+void HexFrame::CreateStatusBar()
 {
-    statusBar_ = wxFrame::CreateStatusBar(2);
-    statusBar_->SetStatusText(wxT("就绪"), 0);
-    statusBar_->SetStatusText(wxT("古风典雅 · 十六进制查看器"), 1);
+    m_statusBar = wxFrame::CreateStatusBar(2);
+    m_statusBar->SetStatusText(wxT("就绪"), 0);
+    m_statusBar->SetStatusText(wxT("古风典雅 · 十六进制查看器"), 1);
 
     // 状态栏样式
-    statusBar_->SetBackgroundColour(AncientColors::CELADON_LIGHT);
-    statusBar_->SetForegroundColour(AncientColors::INK_BLACK);
+    m_statusBar->SetBackgroundColour(AncientColors::CELADON_LIGHT);
+    m_statusBar->SetForegroundColour(AncientColors::INK_BLACK);
 }
 
-wxBitmap AncientHexFrame::CreateAppIcon()
+wxBitmap HexFrame::CreateAppIcon()
 {
     wxBitmap icon(32, 32);
     wxMemoryDC dc;
@@ -240,7 +240,7 @@ wxBitmap AncientHexFrame::CreateAppIcon()
     return icon;
 }
 
-void AncientHexFrame::OnOpen(wxCommandEvent&)
+void HexFrame::OnOpen(wxCommandEvent&)
 {
     wxFileDialog dialog(this, wxT("选择文件"),
         wxEmptyString, wxEmptyString,
@@ -249,23 +249,23 @@ void AncientHexFrame::OnOpen(wxCommandEvent&)
 
     if (dialog.ShowModal() == wxID_OK) {
         wxString filename = dialog.GetPath();
-        hexView_->LoadFile(filename);
+        m_hexView->LoadFile(filename);
 
         wxFileName fn(filename);
         SetTitle(wxString::Format(wxT("古风十六进制 - %s"),
             fn.GetFullName()));
 
-        statusBar_->SetStatusText(
+        m_statusBar->SetStatusText(
             wxString::Format(wxT("已加载: %s"), filename), 0);
     }
 }
 
-void AncientHexFrame::OnExit(wxCommandEvent&)
+void HexFrame::OnExit(wxCommandEvent&)
 {
     Close(true);
 }
 
-void AncientHexFrame::OnAbout(wxCommandEvent&)
+void HexFrame::OnAbout(wxCommandEvent&)
 {
     wxMessageBox(
         wxT("古风十六进制查看器\n\n")
@@ -281,40 +281,40 @@ void AncientHexFrame::OnAbout(wxCommandEvent&)
         wxT("关于"), wxOK | wxICON_INFORMATION, this);
 }
 
-void AncientHexFrame::OnBytes8(wxCommandEvent&)
+void HexFrame::OnBytes8(wxCommandEvent&)
 {
-    hexView_->SetBytesPerLine(8);
+    m_hexView->SetBytesPerLine(8);
 }
 
-void AncientHexFrame::OnFontPlus(wxCommandEvent&)
+void HexFrame::OnFontPlus(wxCommandEvent&)
 {
     static int size = 11;
     if (size < 20) {
         size++;
-        hexView_->SetFontSize(size);
+        m_hexView->SetFontSize(size);
     }
 }
 
-void AncientHexFrame::OnFontMinus(wxCommandEvent&)
+void HexFrame::OnFontMinus(wxCommandEvent&)
 {
     static int size = 11;
     if (size > 8) {
         size--;
-        hexView_->SetFontSize(size);
+        m_hexView->SetFontSize(size);
     }
 }
 
-void AncientHexFrame::OnBytes16(wxCommandEvent&)
+void HexFrame::OnBytes16(wxCommandEvent&)
 {
-    hexView_->SetBytesPerLine(16);
+    m_hexView->SetBytesPerLine(16);
 }
 
-void AncientHexFrame::OnBytes24(wxCommandEvent&)
+void HexFrame::OnBytes24(wxCommandEvent&)
 {
-    hexView_->SetBytesPerLine(24);
+    m_hexView->SetBytesPerLine(24);
 }
 
-void AncientHexFrame::OnBytes32(wxCommandEvent&)
+void HexFrame::OnBytes32(wxCommandEvent&)
 {
-    hexView_->SetBytesPerLine(32);
+    m_hexView->SetBytesPerLine(32);
 }

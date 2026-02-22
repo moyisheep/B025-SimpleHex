@@ -5,4 +5,4 @@
 
 
 
-wxIMPLEMENT_APP(AncientHexApp);
+wxIMPLEMENT_APP(HexApp);

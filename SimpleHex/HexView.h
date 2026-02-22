@@ -9,36 +9,36 @@
 
 
 // ===================== 主视图类 =====================
-class AncientHexView : public wxScrolledWindow {
+class HexView : public wxScrolledWindow {
 private:
-    HexData data_;
-    AncientFont fonts_;
+    HexData m_data;
+    AncientFont m_fonts;
 
     // 显示设置
-    int bytesPerLine_;
-    int fontSize_;
-    int charWidth_;
-    int charHeight_;
-    int lineHeight_;
+    int m_bytesPerLine;
+    int m_fontSize;
+    int m_charWidth;
+    int m_charHeight;
+    int m_lineHeight;
 
     // 选择状态
-    size_t selectionStart_;
-    size_t selectionEnd_;
-    bool hasSelection_;
+    size_t m_selectionStart;
+    size_t m_selectionEnd;
+    bool m_hasSelection;
 
     // 渲染缓存
-    wxBitmap renderCache_;
-    bool cacheValid_;
+    wxBitmap m_renderCache;
+    bool m_isCacheValid;
 
     // 鼠标状态
-    wxPoint mousePos_;
-    bool dragging_;
+    wxPoint m_mousePos;
+    bool m_isDragging;
 
     // 装饰元素
-    bool showDecorations_;
+    bool m_isShowDecorations;
 
 public:
-    AncientHexView(wxWindow* parent);
+    HexView(wxWindow* parent);
        
     void LoadFile(const wxString& filename); 
 

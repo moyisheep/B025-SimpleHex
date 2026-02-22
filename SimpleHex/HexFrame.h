@@ -18,14 +18,14 @@
 #include "Colors.h"
 
 // ===================== 主框架 =====================
-class AncientHexFrame : public wxFrame {
+class HexFrame : public wxFrame {
 private:
-    AncientHexView* hexView_;
-    wxStatusBar* statusBar_;
-    AncientFont fonts_;
+    HexView* m_hexView;
+    wxStatusBar* m_statusBar;
+    AncientFont m_fonts;
 
 public:
-    AncientHexFrame(const wxString& title);
+    HexFrame(const wxString& title);
        
 
 private:
