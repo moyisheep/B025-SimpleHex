@@ -57,6 +57,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     btnOpen->Bind(wxEVT_BUTTON, &HexFrame::OnOpen, this);
     toolSizer->Add(btnOpen, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 
+   
     // 创建"8字节"按钮
     wxButton* btn8Bytes = new wxButton(toolbar, wxID_ANY, wxT("8字节"),
         wxDefaultPosition, wxSize(80, 30));

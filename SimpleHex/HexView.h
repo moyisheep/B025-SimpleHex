@@ -34,8 +34,10 @@ private:
     wxPoint m_mousePos;
     bool m_isDragging;
 
-    // 装饰元素
-    bool m_isShowDecorations;
+    int m_titleHeaderHeight;
+    int m_columnHeaderHeight;
+    int m_columnAddressHeight;
+    int m_padding;
 
 public:
     HexView(wxWindow* parent);
@@ -63,7 +65,9 @@ private:
     void UpdateRenderCache();
     void RenderBackground(wxMemoryDC& dc, const wxSize& size); 
 
-    void RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos); 
+    void RenderColumnAddress(wxMemoryDC& dc, const wxPoint& pos);
+
+    void RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos);
 
     void RenderContent(wxMemoryDC& dc); 
 

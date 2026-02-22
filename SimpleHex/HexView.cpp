@@ -13,7 +13,8 @@ HexView::HexView(wxWindow* parent)
     m_hasSelection(false),
     m_isCacheValid(false),
     m_isDragging(false),
-    m_isShowDecorations(true)
+    m_titleHeaderHeight(50), 
+    m_padding(20)
 {
 
     InitStyles();
@@ -70,6 +71,14 @@ void HexView::CalculateMetrics()
     m_charWidth = charSize.GetWidth();
     m_charHeight = charSize.GetHeight();
     m_lineHeight = m_charHeight + 8;
+    m_columnAddressHeight = m_charHeight + m_padding;
+
+
+    dc.SetFont(m_fonts.Secondary());
+    wxSize secondaryCharSize = dc.GetTextExtent("W");
+    m_columnHeaderHeight = secondaryCharSize.GetHeight() + m_padding;
+
+
 }
 
 void HexView::SetupEvents()
@@ -98,13 +107,15 @@ void HexView::UpdateScrollbars()
 
 wxPoint HexView::GetTextPosition() const
 {
-    return wxPoint(30, 60); // 留出装饰空间
+    return wxPoint(30, m_titleHeaderHeight + 
+        m_columnHeaderHeight + 
+        m_columnAddressHeight ); // 留出装饰空间
 }
 
 wxRect HexView::GetContentRect() const
 {
     wxSize size = GetClientSize();
-    return wxRect(10, 50, size.GetWidth() - 40, size.GetHeight() - 80);
+    return wxRect(10, m_titleHeaderHeight, size.GetWidth() - 40, size.GetHeight() - 60);
 }
 
 void HexView::OnPaint(wxPaintEvent&)
@@ -169,38 +180,69 @@ void HexView::RenderBackground(wxMemoryDC& dc, const wxSize& size)
 
     // 绘制标题
     AncientDecoration::DrawHeader(dc, wxT("古风十六进制查看器"),
-        wxRect(0, 0, size.GetWidth(), 50));
+        wxRect(0, 0, size.GetWidth(), m_titleHeaderHeight));
 
     // 内容区域边框
     wxRect contentRect = GetContentRect();
     AncientDecoration::DrawClassicBorder(dc, contentRect);
 
+
     // 列标题
     wxPoint textPos = GetTextPosition();
-    RenderColumnHeaders(dc, textPos);
+    RenderColumnHeaders(dc, wxPoint(textPos.x, textPos.y - m_columnHeaderHeight - m_columnAddressHeight));
+
+    // 列地址
+    RenderColumnAddress(dc, wxPoint(textPos.x, textPos.y - m_columnHeaderHeight));
+    
 }
+
 
 void HexView::RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos)
 {
+    if (m_data.IsEmpty()) { return; }
+
     dc.SetFont(m_fonts.Secondary());
     dc.SetTextForeground(AncientColors::CELADON_DARK);
 
+
     // 偏移地址标题
-    dc.DrawText(wxT("偏移地址"), pos.x, pos.y - 25);
+    dc.DrawText(wxT("偏移地址"), pos.x, pos.y + m_padding/2);
 
     // 十六进制标题
     int hexX = pos.x + 80;
-    dc.DrawText(wxT("十六进制"), hexX, pos.y - 25);
+    dc.DrawText(wxT("十六进制"), hexX, pos.y + m_padding / 2);
 
     // ASCII标题
     int asciiX = hexX + m_bytesPerLine * 3 * m_charWidth + 40;
-    dc.DrawText(wxT("字符"), asciiX, pos.y - 25);
+    dc.DrawText(wxT("字符"), asciiX, pos.y + m_padding / 2);
 
     // 分隔线
-    AncientDecoration::DrawSeparator(dc, pos.x, pos.y - 5,
+    AncientDecoration::DrawSeparator(dc, pos.x, pos.y + m_columnHeaderHeight,
         GetContentRect().width - 20);
 }
+void HexView::RenderColumnAddress(wxMemoryDC& dc, const wxPoint& pos)
+{
+    if (m_data.IsEmpty()) { return; }
+    dc.SetFont(m_fonts.Primary());
+    dc.SetTextForeground(AncientColors::INK_GRAY);
 
+
+    // 十六进制数据
+    int hexX = pos.x + 80;
+    for (int i = 0; i < m_bytesPerLine; i++) {
+
+        wxString byteStr = wxString::Format(wxT("%02X"), i);
+
+
+        dc.DrawText(byteStr, hexX + i * 3 * m_charWidth, pos.y + m_padding / 3);
+
+        // 字节间分隔点
+        if (i < m_bytesPerLine - 1) {
+            dc.SetPen(wxPen(AncientColors::CELADON_MID, 1));
+            dc.DrawPoint(hexX + i * 3 * m_charWidth + 2 * m_charWidth + 4, pos.y + m_charHeight / 2 + m_padding / 3);
+        }
+    }
+}
 void HexView::RenderContent(wxMemoryDC& dc)
 {
     wxPoint textPos = GetTextPosition();
@@ -212,14 +254,11 @@ void HexView::RenderContent(wxMemoryDC& dc)
         size_t offset = (startLine + line) * m_bytesPerLine;
         if (offset >= m_data.Size()) break;
 
-        int y = textPos.y + line * m_lineHeight;
+        int y = textPos.y + line * m_lineHeight ;
         RenderLine(dc, startLine + line, offset, y);
     }
 
-    // 自定义滚动条
-    if (m_isShowDecorations) {
-        RenderCustomScrollbar(dc);
-    }
+
 }
 
 void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
@@ -235,6 +274,8 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
 
     // 十六进制数据
     int hexX = pos.x + 80;
+    int selectionStart = std::min(m_selectionStart, m_selectionEnd);
+    int selectionEnd = std::max(m_selectionStart, m_selectionEnd);
     for (int i = 0; i < m_bytesPerLine; i++) {
         size_t index = offset + i;
         if (index >= m_data.Size()) break;
@@ -243,7 +284,7 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
         wxString byteStr = wxString::Format(wxT("%02X"), byte);
 
         // 高亮选择
-        if (m_hasSelection && index >= m_selectionStart && index <= m_selectionEnd) {
+        if (m_hasSelection && index >= selectionStart && index <= selectionEnd) {
             dc.SetPen(wxPen(AncientColors::VERMILION, 1));
             dc.SetBrush(wxBrush(AncientColors::VERMILION.ChangeLightness(180)));
             dc.DrawRectangle(hexX + i * 3 * m_charWidth - 2,
@@ -274,14 +315,17 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
         size_t index = offset + i;
 
         // 高亮选择
-        if (m_hasSelection && index >= m_selectionStart && index <= m_selectionEnd) {
+        if (m_hasSelection && index >= selectionStart && index <= selectionEnd) {
             dc.SetPen(wxPen(AncientColors::SONG_BLUE, 1));
+            dc.SetPen(*wxTRANSPARENT_PEN);
             dc.SetBrush(wxBrush(AncientColors::SONG_BLUE.ChangeLightness(180)));
-            dc.DrawRectangle(asciiX + i * m_charWidth - 2,
-                y - 1,
-                m_charWidth + 4,
-                m_charHeight + 2);
+            dc.DrawRectangle(asciiX + i * m_charWidth ,
+                y ,
+                m_charWidth ,
+                m_charHeight );
         }
+
+
 
         wxChar ch = asciiStr[i];
         wxColor color = (ch == wxT('·')) ?
@@ -293,24 +337,7 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
     }
 }
 
-void HexView::RenderCustomScrollbar(wxMemoryDC& dc)
-{
-    wxSize size = GetClientSize();
-    wxRect scrollRect(size.GetWidth() - 25, 50, 20, size.GetHeight() - 80);
 
-    if (!m_data.IsEmpty()) {
-        int totalLines = (m_data.Size() + m_bytesPerLine - 1) / m_bytesPerLine;
-        int visibleLines = size.GetHeight() / m_lineHeight;
-
-        if (totalLines > visibleLines) {
-            double thumbSize = static_cast<double>(visibleLines) / totalLines;
-            double position = static_cast<double>(GetViewStart().y) /
-                (totalLines * m_lineHeight);
-
-            AncientDecoration::DrawScrollBar(dc, scrollRect, position, thumbSize);
-        }
-    }
-}
 
 void HexView::RenderEmptyState(wxMemoryDC& dc, const wxSize& size)
 {
