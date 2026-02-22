@@ -145,7 +145,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Decoration.cpp" />
+    <ClCompile Include="HexData.cpp" />
+    <ClCompile Include="HexFrame.cpp" />
+    <ClCompile Include="HexView.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Colors.h" />
+    <ClInclude Include="Decoration.h" />
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="HexApp.h" />
+    <ClInclude Include="HexData.h" />
+    <ClInclude Include="HexFrame.h" />
+    <ClInclude Include="HexView.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

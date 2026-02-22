@@ -18,5 +18,40 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Decoration.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HexData.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HexView.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HexFrame.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Colors.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HexData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Decoration.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HexView.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HexFrame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="HexApp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
