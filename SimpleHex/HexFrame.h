@@ -46,7 +46,9 @@ private:
     void OnBytes8(wxCommandEvent&); 
     void OnBytes16(wxCommandEvent&); 
     void OnBytes24(wxCommandEvent&);
-    void OnBytes32(wxCommandEvent&); 
+    void OnBytes32(wxCommandEvent&);
+    void OnMouseMove(wxMouseEvent& event);
+
 
     void OnFontPlus(wxCommandEvent&);
 

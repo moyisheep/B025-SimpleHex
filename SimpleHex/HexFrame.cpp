@@ -17,6 +17,8 @@ HexFrame::HexFrame(const wxString& title)
 
     Center();
     Show(true);
+
+    Bind(wxEVT_MOTION, &HexFrame::OnMouseMove, this);
 }
 
 void HexFrame::CreateUI()
@@ -187,6 +189,8 @@ void HexFrame::CreateMenu()
     Bind(wxEVT_MENU, &HexFrame::OnFontPlus, this, 1005);
     Bind(wxEVT_MENU, &HexFrame::OnFontMinus, this, 1006);
 
+
+
     // 快捷键
     wxAcceleratorEntry entries[] = {
         {wxACCEL_CTRL, 'O', wxID_OPEN},
@@ -318,4 +322,12 @@ void HexFrame::OnBytes24(wxCommandEvent&)
 void HexFrame::OnBytes32(wxCommandEvent&)
 {
     m_hexView->SetBytesPerLine(32);
+}
+
+
+void HexFrame::OnMouseMove(wxMouseEvent& event)
+{
+    wxPoint pos = event.GetPosition();
+
+    
 }

@@ -11,7 +11,8 @@ HexView::HexView(wxWindow* parent)
     m_hoverIndex(0),
     m_isCacheValid(false),
     m_isDragging(false),
-    m_titleHeaderHeight(50)
+    m_titleHeaderHeight(50), 
+    m_scrollDelta(0)
 {
 
     InitStyles();
@@ -25,6 +26,7 @@ void HexView::LoadFile(const wxString& filename)
 {
     if (m_data.LoadFromFile(filename)) {
         m_isCacheValid = false;
+        m_scrollDelta = 0;
         m_selection.Clear();
         UpdateScrollbars();
         Refresh();
@@ -93,6 +95,7 @@ void HexView::SetupEvents()
 
 void HexView::UpdateScrollbars()
 {
+
     if (m_data.IsEmpty()) {
         SetScrollbars(0, m_lineHeight, 0, 0);
         return;
@@ -256,7 +259,9 @@ void HexView::RenderContent(wxMemoryDC& dc)
 {
     wxPoint textPos = GetTextPosition();
 
-    int startLine = GetViewStart().y / m_lineHeight;
+
+    int startLine = m_scrollDelta;
+    //int startLine = GetViewStart().y / m_lineHeight;
     int visibleLines = GetClientSize().GetHeight() / m_lineHeight + 2;
 
     for (int line = 0; line < visibleLines; line++) {
@@ -443,21 +448,22 @@ size_t HexView::PosToIndex(const wxPoint& pos) const
     int line = (pos.y - textPos.y) / m_lineHeight;
     if (line < 0) return 0;
 
+    size_t base = m_scrollDelta * m_bytesPerLine;
     size_t offset = line * m_bytesPerLine;
 
     int hexX = textPos.x + 80;
     if (pos.x >= hexX && pos.x < hexX + m_bytesPerLine * 3 * m_charWidth) {
         int col = (pos.x - hexX) / (3 * m_charWidth);
-        return offset + col;
+        return base + offset + col;
     }
 
     int asciiX = hexX + m_bytesPerLine * 3 * m_charWidth + 40;
     if (pos.x >= asciiX && pos.x < asciiX + m_bytesPerLine * m_charWidth) {
         int col = (pos.x - asciiX) / m_charWidth;
-        return offset + col;
+        return base + offset + col;
     }
 
-    return offset;
+    return base + offset;
 }
 
 void HexView::OnSize(wxSizeEvent&)
@@ -470,7 +476,8 @@ void HexView::OnSize(wxSizeEvent&)
 void HexView::OnMouseWheel(wxMouseEvent& event)
 {
     int lines = event.GetWheelRotation() / event.GetWheelDelta();
-    Scroll(0, GetViewStart().y - lines * 3);
+    m_scrollDelta -= lines;
+    //Scroll(0, GetViewStart().y - lines * 3);
     m_isCacheValid = false;
     Refresh();
 }
@@ -519,6 +526,7 @@ void HexView::OnMouseMove(wxMouseEvent& event)
             m_isCacheValid = false;
             Refresh();
         }
+        
     }
 
 }

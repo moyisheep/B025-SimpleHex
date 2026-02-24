@@ -36,6 +36,7 @@ private:
     int m_columnAddressHeight;
     int m_padding;
 
+    int m_scrollDelta;
 public:
     HexView(wxWindow* parent);
        
@@ -61,11 +62,11 @@ private:
 
     void OnPaint(wxPaintEvent&); 
 
-    void UpdateBackgoundLayer();
-    void UpdateSelection();
-    void UpdateHoverLayer();
-    void UpdateMarkerLayer();
-    void UpdateContentLayer();
+    //void UpdateBackgoundLayer();
+    //void UpdateSelection();
+    //void UpdateHoverLayer();
+    //void UpdateMarkerLayer();
+    //void UpdateContentLayer();
     void UpdateRenderCache();
     void RenderBackground(wxMemoryDC& dc, const wxSize& size); 
 
@@ -73,7 +74,8 @@ private:
 
     void RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos);
 
-    void RenderContent(wxMemoryDC& dc); 
+    void RenderContent(wxMemoryDC& dc);
+
 
     void RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y); 
 
