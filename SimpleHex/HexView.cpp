@@ -8,13 +8,10 @@ HexView::HexView(wxWindow* parent)
         wxDefaultSize, wxBORDER_NONE | wxVSCROLL),
     m_bytesPerLine(16),
     m_fontSize(11),
-    m_selectionStart(0),
-    m_selectionEnd(0),
-    m_hasSelection(false),
+    m_hoverIndex(0),
     m_isCacheValid(false),
     m_isDragging(false),
-    m_titleHeaderHeight(50), 
-    m_padding(20)
+    m_titleHeaderHeight(50)
 {
 
     InitStyles();
@@ -28,7 +25,7 @@ void HexView::LoadFile(const wxString& filename)
 {
     if (m_data.LoadFromFile(filename)) {
         m_isCacheValid = false;
-        m_hasSelection = false;
+        m_selection.Clear();
         UpdateScrollbars();
         Refresh();
     }
@@ -70,6 +67,8 @@ void HexView::CalculateMetrics()
     wxSize charSize = dc.GetTextExtent("W");
     m_charWidth = charSize.GetWidth();
     m_charHeight = charSize.GetHeight();
+
+    m_padding = m_charWidth;
     m_lineHeight = m_charHeight + 8;
     m_columnAddressHeight = m_charHeight + m_padding;
 
@@ -116,6 +115,11 @@ wxRect HexView::GetContentRect() const
 {
     wxSize size = GetClientSize();
     return wxRect(10, m_titleHeaderHeight, size.GetWidth() - 40, size.GetHeight() - 60);
+}
+
+wxRect HexView::GetIndexRect() const
+{
+    return wxRect();
 }
 
 void HexView::OnPaint(wxPaintEvent&)
@@ -186,6 +190,8 @@ void HexView::RenderBackground(wxMemoryDC& dc, const wxSize& size)
     wxRect contentRect = GetContentRect();
     AncientDecoration::DrawClassicBorder(dc, contentRect);
 
+    if(!m_data.IsEmpty())
+    {
 
     // 列标题
     wxPoint textPos = GetTextPosition();
@@ -193,13 +199,13 @@ void HexView::RenderBackground(wxMemoryDC& dc, const wxSize& size)
 
     // 列地址
     RenderColumnAddress(dc, wxPoint(textPos.x, textPos.y - m_columnHeaderHeight));
-    
+    }
 }
 
 
 void HexView::RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos)
 {
-    if (m_data.IsEmpty()) { return; }
+
 
     dc.SetFont(m_fonts.Secondary());
     dc.SetTextForeground(AncientColors::CELADON_DARK);
@@ -222,7 +228,7 @@ void HexView::RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos)
 }
 void HexView::RenderColumnAddress(wxMemoryDC& dc, const wxPoint& pos)
 {
-    if (m_data.IsEmpty()) { return; }
+
     dc.SetFont(m_fonts.Primary());
     dc.SetTextForeground(AncientColors::INK_GRAY);
 
@@ -239,7 +245,10 @@ void HexView::RenderColumnAddress(wxMemoryDC& dc, const wxPoint& pos)
         // 字节间分隔点
         if (i < m_bytesPerLine - 1) {
             dc.SetPen(wxPen(AncientColors::CELADON_MID, 1));
-            dc.DrawPoint(hexX + i * 3 * m_charWidth + 2 * m_charWidth + 4, pos.y + m_charHeight / 2 + m_padding / 3);
+            dc.DrawPoint(hexX + 
+                i * 3 * m_charWidth + 
+                2 * m_charWidth + 4, 
+                pos.y + m_charHeight / 2 + m_padding / 2);
         }
     }
 }
@@ -274,8 +283,7 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
 
     // 十六进制数据
     int hexX = pos.x + 80;
-    int selectionStart = std::min(m_selectionStart, m_selectionEnd);
-    int selectionEnd = std::max(m_selectionStart, m_selectionEnd);
+
     for (int i = 0; i < m_bytesPerLine; i++) {
         size_t index = offset + i;
         if (index >= m_data.Size()) break;
@@ -284,9 +292,20 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
         wxString byteStr = wxString::Format(wxT("%02X"), byte);
 
         // 高亮选择
-        if (m_hasSelection && index >= selectionStart && index <= selectionEnd) {
+        if (m_selection.HasSelection(index)) {
             dc.SetPen(wxPen(AncientColors::VERMILION, 1));
             dc.SetBrush(wxBrush(AncientColors::VERMILION.ChangeLightness(180)));
+            dc.DrawRectangle(hexX + i * 3 * m_charWidth - 2,
+                y - 1,
+                m_charWidth * 2 + 4,
+                m_charHeight + 2);
+        }
+
+        // 鼠标悬浮
+        if(m_hoverIndex == index)
+        {
+            dc.SetPen(wxPen(AncientColors::INK_GRAY, 1));
+            dc.SetBrush(*wxTRANSPARENT_BRUSH);
             dc.DrawRectangle(hexX + i * 3 * m_charWidth - 2,
                 y - 1,
                 m_charWidth * 2 + 4,
@@ -315,7 +334,7 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
         size_t index = offset + i;
 
         // 高亮选择
-        if (m_hasSelection && index >= selectionStart && index <= selectionEnd) {
+        if (m_selection.HasSelection(index)) {
             dc.SetPen(wxPen(AncientColors::SONG_BLUE, 1));
             dc.SetPen(*wxTRANSPARENT_PEN);
             dc.SetBrush(wxBrush(AncientColors::SONG_BLUE.ChangeLightness(180)));
@@ -325,7 +344,16 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
                 m_charHeight );
         }
 
-
+        // 鼠标悬浮
+        if (m_hoverIndex == index)
+        {
+            dc.SetPen(wxPen(AncientColors::INK_GRAY, 1));
+            dc.SetBrush(*wxTRANSPARENT_BRUSH);
+            dc.DrawRectangle(asciiX + i * m_charWidth,
+                y,
+                m_charWidth,
+                m_charHeight);
+        }
 
         wxChar ch = asciiStr[i];
         wxColor color = (ch == wxT('·')) ?
@@ -454,8 +482,7 @@ void HexView::OnMouseDown(wxMouseEvent& event)
 
     size_t index = PosToIndex(pos);
     if (index < m_data.Size()) {
-        m_selectionStart = m_selectionEnd = index;
-        m_hasSelection = true;
+        m_selection.OnMouseDown(index);
         m_isCacheValid = false;
         Refresh();
     }
@@ -473,17 +500,27 @@ void HexView::OnMouseUp(wxMouseEvent& event)
 
 void HexView::OnMouseMove(wxMouseEvent& event)
 {
-    if (m_isDragging && event.Dragging()) {
-        wxPoint pos = event.GetPosition();
-        pos += GetViewStart();
+    wxPoint pos = event.GetPosition();
+    pos += GetViewStart();
+    size_t index = PosToIndex(pos);
 
-        size_t index = PosToIndex(pos);
+    if (m_isDragging && event.Dragging()) {
         if (index < m_data.Size()) {
-            m_selectionEnd = index;
+            m_selection.OnMouseMove(index);
             m_isCacheValid = false;
             Refresh();
         }
     }
+    if ( index != m_hoverIndex)
+    {
+        m_hoverIndex = index;
+        if(m_hoverIndex)
+        {
+            m_isCacheValid = false;
+            Refresh();
+        }
+    }
+
 }
 
 void HexView::OnKeyDown(wxKeyEvent& event)
@@ -503,15 +540,13 @@ void HexView::OnKeyDown(wxKeyEvent& event)
         break;
     case 'A':
         if (event.ControlDown()) {
-            m_selectionStart = 0;
-            m_selectionEnd = m_data.Size() - 1;
-            m_hasSelection = true;
+            m_selection.Set(0, m_data.Size() - 1);
             m_isCacheValid = false;
             Refresh();
         }
         break;
     case 'C':
-        if (event.ControlDown() && m_hasSelection) {
+        if (event.ControlDown() && m_selection.HasSelection()) {
             CopySelection();
         }
         break;
@@ -523,11 +558,10 @@ void HexView::OnKeyDown(wxKeyEvent& event)
 
 void HexView::CopySelection()
 {
-    if (!m_hasSelection || m_data.IsEmpty()) return;
+    if (!m_selection.HasSelection() || m_data.IsEmpty()) return;
 
-    size_t start = std::min(m_selectionStart, m_selectionEnd);
-    size_t end = std::max(m_selectionStart, m_selectionEnd);
-
+    size_t start = 0, end = 0;
+    m_selection.Get(start, end);
     wxString hexStr, asciiStr;
     for (size_t i = start; i <= end && i < m_data.Size(); i++) {
         hexStr += wxString::Format(wxT("%02X "), m_data.GetByte(i));

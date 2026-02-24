@@ -6,7 +6,7 @@
 #include <wx/dcclient.h>
 #include "Font.h"
 #include "HexData.h"
-
+#include "Selection.h"
 
 // ===================== 主视图类 =====================
 class HexView : public wxScrolledWindow {
@@ -21,17 +21,14 @@ private:
     int m_charHeight;
     int m_lineHeight;
 
-    // 选择状态
-    size_t m_selectionStart;
-    size_t m_selectionEnd;
-    bool m_hasSelection;
+    Selection m_selection;
 
     // 渲染缓存
     wxBitmap m_renderCache;
     bool m_isCacheValid;
 
     // 鼠标状态
-    wxPoint m_mousePos;
+    size_t m_hoverIndex;
     bool m_isDragging;
 
     int m_titleHeaderHeight;
@@ -60,8 +57,15 @@ private:
 
     wxRect GetContentRect() const; 
 
+    wxRect GetIndexRect() const;
+
     void OnPaint(wxPaintEvent&); 
 
+    void UpdateBackgoundLayer();
+    void UpdateSelection();
+    void UpdateHoverLayer();
+    void UpdateMarkerLayer();
+    void UpdateContentLayer();
     void UpdateRenderCache();
     void RenderBackground(wxMemoryDC& dc, const wxSize& size); 
 
@@ -72,7 +76,7 @@ private:
     void RenderContent(wxMemoryDC& dc); 
 
     void RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y); 
-    void RenderCustomScrollbar(wxMemoryDC& dc); 
+
 
     void RenderEmptyState(wxMemoryDC& dc, const wxSize& size);
 

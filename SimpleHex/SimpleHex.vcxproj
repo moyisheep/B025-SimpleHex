@@ -150,6 +150,7 @@
     <ClCompile Include="HexFrame.cpp" />
     <ClCompile Include="HexView.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Selection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Colors.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="HexData.h" />
     <ClInclude Include="HexFrame.h" />
     <ClInclude Include="HexView.h" />
+    <ClInclude Include="Selection.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
