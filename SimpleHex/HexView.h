@@ -20,6 +20,9 @@ private:
     int m_charWidth;
     int m_charHeight;
     int m_lineHeight;
+    int m_rowAddressWidth;
+    int m_rowHexWidth;
+
 
     Selection m_selection;
 
@@ -36,13 +39,16 @@ private:
     int m_columnAddressHeight;
     int m_padding;
 
-    int m_scrollDelta;
+    size_t m_scrollDelta;
+    size_t m_totalLines;
 public:
     HexView(wxWindow* parent);
        
     void LoadFile(const wxString& filename); 
 
-    void SetBytesPerLine(int bytes); 
+    void SetBytesPerLine(int bytes);
+    int GetFontSize() const;
+
 
     void SetFontSize(int size);
 
@@ -52,7 +58,9 @@ private:
 
     void SetupEvents(); 
 
-    void UpdateScrollbars(); 
+    void OnScroll(wxScrollWinEvent& event);
+
+    void UpdateScrollbars();
 
     wxPoint GetTextPosition() const;
 
@@ -68,16 +76,30 @@ private:
     //void UpdateMarkerLayer();
     //void UpdateContentLayer();
     void UpdateRenderCache();
-    void RenderBackground(wxMemoryDC& dc, const wxSize& size); 
+    void RenderBackground(wxMemoryDC& dc, const wxSize& size);
+    wxColor BlendColors(const wxColor& c1, const wxColor& c2, double ratio);
+
+    void RenderTitleHeader(wxDC& dc, const wxString& text, const wxRect& rect);
+
+
+    void RenderSeparator(wxDC& dc, int x, int y, int width);
 
     void RenderColumnAddress(wxMemoryDC& dc, const wxPoint& pos);
+
+    void RenderBorder(wxDC& dc, const wxRect& rect);
 
     void RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos);
 
     void RenderContent(wxMemoryDC& dc);
 
 
-    void RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y); 
+    void RenderAddress(wxMemoryDC& dc, size_t offset, int x, int y);
+
+    void RenderLineHex(wxMemoryDC& dc, size_t offset, int x, int y);
+
+    void RenderLineHexText(wxMemoryDC& dc, size_t offset, int x, int y);
+
+    void RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y);
 
 
     void RenderEmptyState(wxMemoryDC& dc, const wxSize& size);

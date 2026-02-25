@@ -36,7 +36,7 @@ void HexFrame::CreateUI()
 
     // 布局
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(m_hexView, 1, wxEXPAND | wxALL, 10);
+    sizer->Add(m_hexView, 1, wxEXPAND | wxALL);
     panel->SetSizer(sizer);
 }
 
@@ -293,20 +293,14 @@ void HexFrame::OnBytes8(wxCommandEvent&)
 
 void HexFrame::OnFontPlus(wxCommandEvent&)
 {
-    static int size = 11;
-    if (size < 20) {
-        size++;
-        m_hexView->SetFontSize(size);
-    }
+    int size = m_hexView->GetFontSize() + 1;
+    m_hexView->SetFontSize(size);
 }
 
 void HexFrame::OnFontMinus(wxCommandEvent&)
 {
-    static int size = 11;
-    if (size > 8) {
-        size--;
-        m_hexView->SetFontSize(size);
-    }
+    int size = m_hexView->GetFontSize() - 1;
+    m_hexView->SetFontSize(size);
 }
 
 void HexFrame::OnBytes16(wxCommandEvent&)
