@@ -68,7 +68,6 @@ private:
 
     wxRect GetContentRect() const;
 
-    wxRect GetIndexRect() const;
 
     void OnPaint(wxPaintEvent&); 
 
