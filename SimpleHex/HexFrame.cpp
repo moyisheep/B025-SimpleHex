@@ -54,7 +54,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     wxButton* btnOpen = new wxButton(toolbar, wxID_ANY, wxT("打开"),
         wxDefaultPosition, wxSize(80, 30));
     btnOpen->SetFont(m_fonts.Secondary());
-    btnOpen->SetBackgroundColour(AncientColors::CELADON_MID);
+    btnOpen->SetBackgroundColour(AncientColors::BORDER_INNER);
     btnOpen->SetForegroundColour(AncientColors::INK_BLACK);
     btnOpen->Bind(wxEVT_BUTTON, &HexFrame::OnOpen, this);
     toolSizer->Add(btnOpen, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
@@ -64,7 +64,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     wxButton* btn8Bytes = new wxButton(toolbar, wxID_ANY, wxT("8字节"),
         wxDefaultPosition, wxSize(80, 30));
     btn8Bytes->SetFont(m_fonts.Secondary());
-    btn8Bytes->SetBackgroundColour(AncientColors::CELADON_MID);
+    btn8Bytes->SetBackgroundColour(AncientColors::BORDER_INNER);
     btn8Bytes->SetForegroundColour(AncientColors::INK_BLACK);
     btn8Bytes->Bind(wxEVT_BUTTON, &HexFrame::OnBytes8, this);
     toolSizer->Add(btn8Bytes, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -73,7 +73,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     wxButton* btn16Bytes = new wxButton(toolbar, wxID_ANY, wxT("16字节"),
         wxDefaultPosition, wxSize(80, 30));
     btn16Bytes->SetFont(m_fonts.Secondary());
-    btn16Bytes->SetBackgroundColour(AncientColors::CELADON_MID);
+    btn16Bytes->SetBackgroundColour(AncientColors::BORDER_INNER);
     btn16Bytes->SetForegroundColour(AncientColors::INK_BLACK);
     btn16Bytes->Bind(wxEVT_BUTTON, &HexFrame::OnBytes16, this);
     toolSizer->Add(btn16Bytes, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -82,7 +82,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     wxButton* btn24Bytes = new wxButton(toolbar, wxID_ANY, wxT("24字节"),
         wxDefaultPosition, wxSize(80, 30));
     btn24Bytes->SetFont(m_fonts.Secondary());
-    btn24Bytes->SetBackgroundColour(AncientColors::CELADON_MID);
+    btn24Bytes->SetBackgroundColour(AncientColors::BORDER_INNER);
     btn24Bytes->SetForegroundColour(AncientColors::INK_BLACK);
     btn24Bytes->Bind(wxEVT_BUTTON, &HexFrame::OnBytes24, this);
     toolSizer->Add(btn24Bytes, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -91,7 +91,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     wxButton* btn32Bytes = new wxButton(toolbar, wxID_ANY, wxT("32字节"),
         wxDefaultPosition, wxSize(80, 30));
     btn32Bytes->SetFont(m_fonts.Secondary());
-    btn32Bytes->SetBackgroundColour(AncientColors::CELADON_MID);
+    btn32Bytes->SetBackgroundColour(AncientColors::BORDER_INNER);
     btn32Bytes->SetForegroundColour(AncientColors::INK_BLACK);
     btn32Bytes->Bind(wxEVT_BUTTON, &HexFrame::OnBytes32, this);
     toolSizer->Add(btn32Bytes, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
@@ -100,7 +100,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     wxButton* btnFontPlus = new wxButton(toolbar, wxID_ANY, wxT("字体+"),
         wxDefaultPosition, wxSize(80, 30));
     btnFontPlus->SetFont(m_fonts.Secondary());
-    btnFontPlus->SetBackgroundColour(AncientColors::CELADON_MID);
+    btnFontPlus->SetBackgroundColour(AncientColors::BORDER_INNER);
     btnFontPlus->SetForegroundColour(AncientColors::INK_BLACK);
     btnFontPlus->Bind(wxEVT_BUTTON, &HexFrame::OnFontPlus, this);
     toolSizer->Add(btnFontPlus, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
@@ -109,7 +109,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     wxButton* btnFontMinus = new wxButton(toolbar, wxID_ANY, wxT("字体-"),
         wxDefaultPosition, wxSize(80, 30));
     btnFontMinus->SetFont(m_fonts.Secondary());
-    btnFontMinus->SetBackgroundColour(AncientColors::CELADON_MID);
+    btnFontMinus->SetBackgroundColour(AncientColors::BORDER_INNER);
     btnFontMinus->SetForegroundColour(AncientColors::INK_BLACK);
     btnFontMinus->Bind(wxEVT_BUTTON, &HexFrame::OnFontMinus, this);
     toolSizer->Add(btnFontMinus, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
@@ -117,12 +117,12 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     // 为所有按钮添加悬停效果
     auto SetupHoverEffect = [](wxButton* btn) {
         btn->Bind(wxEVT_ENTER_WINDOW, [btn](wxMouseEvent&) {
-            btn->SetBackgroundColour(AncientColors::CELADON_DARK);
+            btn->SetBackgroundColour(AncientColors::BORDER_OUTER);
             btn->Refresh();
             });
 
         btn->Bind(wxEVT_LEAVE_WINDOW, [btn](wxMouseEvent&) {
-            btn->SetBackgroundColour(AncientColors::CELADON_MID);
+            btn->SetBackgroundColour(AncientColors::BORDER_INNER);
             btn->Refresh();
             });
     };
@@ -141,7 +141,7 @@ void HexFrame::CreateToolBar(wxWindow* parent)
     wxStaticText* title = new wxStaticText(toolbar, wxID_ANY,
         wxT("古风十六进制查看器"));
     title->SetFont(m_fonts.Decorative());
-    title->SetForegroundColour(AncientColors::CELADON_DARK);
+    title->SetForegroundColour(AncientColors::BORDER_OUTER);
     toolSizer->Add(title, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 20);
 
     toolSizer->AddSpacer(20);
@@ -207,7 +207,7 @@ void HexFrame::CreateMenu()
 
 void HexFrame::CreateStatusBar()
 {
-    m_statusBar = wxFrame::CreateStatusBar(2);
+    m_statusBar = wxFrame::CreateStatusBar(3);
     m_statusBar->SetStatusText(wxT("就绪"), 0);
     m_statusBar->SetStatusText(wxT("古风典雅 · 十六进制查看器"), 1);
 
@@ -223,7 +223,7 @@ wxBitmap HexFrame::CreateAppIcon()
     dc.SelectObject(icon);
 
     // 绘制古风图标：古书与八卦
-    dc.SetBackground(wxBrush(AncientColors::CELADON_DARK));
+    dc.SetBackground(wxBrush(AncientColors::BORDER_OUTER));
     dc.Clear();
 
     dc.SetPen(wxPen(AncientColors::AMBER_GOLD, 2));
@@ -237,7 +237,7 @@ wxBitmap HexFrame::CreateAppIcon()
     dc.DrawLine(12, 20, 20, 20);  // 阴爻
 
     // 书页装饰
-    dc.SetPen(wxPen(AncientColors::VERMILION, 1));
+    dc.SetPen(wxPen(AncientColors::HIGHLIGHT_FOREGROUND_HEX, 1));
     dc.DrawLine(8, 8, 24, 8);
     dc.DrawLine(8, 24, 24, 24);
 
@@ -322,6 +322,7 @@ void HexFrame::OnBytes32(wxCommandEvent&)
 void HexFrame::OnMouseMove(wxMouseEvent& event)
 {
     wxPoint pos = event.GetPosition();
-
+    wxString addr = m_hexView->GetHoverAddress();
+    m_statusBar->SetStatusText(addr, 1);
     
 }

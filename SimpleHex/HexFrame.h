@@ -39,7 +39,8 @@ private:
     wxBitmap CreateAppIcon(); 
 
     void OnOpen(wxCommandEvent&); 
-    void OnExit(wxCommandEvent&); 
+    void OnExit(wxCommandEvent&);
+
 
     void OnAbout(wxCommandEvent&);
 

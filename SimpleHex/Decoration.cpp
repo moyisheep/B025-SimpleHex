@@ -4,18 +4,18 @@
 void AncientDecoration::DrawClassicBorder(wxDC& dc, const wxRect& rect)
 {
     // 绘制双层边框
-    dc.SetPen(wxPen(AncientColors::CELADON_DARK, 2));
+    dc.SetPen(wxPen(AncientColors::BORDER_OUTER, 2));
     dc.DrawRectangle(rect);
 
     // 内边框
     wxRect innerRect = rect;
     innerRect.Deflate(2);
-    dc.SetPen(wxPen(AncientColors::CELADON_MID, 1));
+    dc.SetPen(wxPen(AncientColors::BORDER_INNER, 1));
     dc.DrawRectangle(innerRect);
 
     // 角落装饰
     int cornerSize = 8;
-    dc.SetPen(wxPen(AncientColors::VERMILION, 2));
+    dc.SetPen(wxPen(AncientColors::HIGHLIGHT_FOREGROUND_HEX, 2));
 
     // 左上角
     dc.DrawLine(rect.x + 5, rect.y, rect.x + cornerSize, rect.y);
@@ -45,7 +45,7 @@ void AncientDecoration::DrawScrollBar(wxDC& dc, const wxRect& rect, double posit
     // 滚动条背景
     wxRect bgRect = rect;
     bgRect.Deflate(1);
-    dc.SetPen(wxPen(AncientColors::INK_LIGHT, 1));
+    dc.SetPen(wxPen(AncientColors::BYTE_00, 1));
     dc.SetBrush(wxBrush(AncientColors::CELADON_LIGHT));
     dc.DrawRoundedRectangle(bgRect, 4);
 
@@ -56,14 +56,14 @@ void AncientDecoration::DrawScrollBar(wxDC& dc, const wxRect& rect, double posit
     wxRect thumbRect(rect.x, thumbY, rect.width, thumbHeight);
     thumbRect.Deflate(2, 4);
 
-    dc.SetPen(wxPen(AncientColors::CELADON_DARK, 1));
-    dc.SetBrush(wxBrush(AncientColors::CELADON_MID));
+    dc.SetPen(wxPen(AncientColors::BORDER_OUTER, 1));
+    dc.SetBrush(wxBrush(AncientColors::BORDER_INNER));
     dc.DrawRoundedRectangle(thumbRect, 6);
 
     // 滑块内部装饰
     wxRect innerRect = thumbRect;
     innerRect.Deflate(2);
-    dc.SetPen(wxPen(AncientColors::LILAC, 1));
+    dc.SetPen(wxPen(AncientColors::BYTE_OTHER, 1));
     dc.SetBrush(wxBrush(AncientColors::RICE_PAPER, wxBRUSHSTYLE_TRANSPARENT));
     dc.DrawRoundedRectangle(innerRect, 4);
 }
@@ -74,8 +74,8 @@ void AncientDecoration::DrawHeader(wxDC& dc, const wxString& text, const wxRect&
     wxRect gradRect = rect;
     gradRect.height = 40;
 
-    wxColour topColor = AncientColors::CELADON_DARK;
-    wxColour bottomColor = AncientColors::CELADON_MID;
+    wxColour topColor = AncientColors::BORDER_OUTER;
+    wxColour bottomColor = AncientColors::BORDER_INNER;
 
     for (int y = 0; y < gradRect.height; y++) {
         double ratio = static_cast<double>(y) / gradRect.height;
@@ -86,7 +86,7 @@ void AncientDecoration::DrawHeader(wxDC& dc, const wxString& text, const wxRect&
     }
 
     // 装饰花纹
-    dc.SetPen(wxPen(AncientColors::VERMILION, 1));
+    dc.SetPen(wxPen(AncientColors::HIGHLIGHT_FOREGROUND_HEX, 1));
     for (int i = 0; i < gradRect.width; i += 30) {
         dc.DrawLine(gradRect.x + i, gradRect.y + gradRect.height - 2,
             gradRect.x + i + 15, gradRect.y + gradRect.height - 2);
@@ -113,7 +113,7 @@ void AncientDecoration::DrawHeader(wxDC& dc, const wxString& text, const wxRect&
 void AncientDecoration::DrawSeparator(wxDC& dc, int x, int y, int width)
 {
     // 传统分隔线
-    wxPen pen1(AncientColors::CELADON_DARK, 1);
+    wxPen pen1(AncientColors::BORDER_OUTER, 1);
     wxPen pen2(AncientColors::RICE_PAPER, 1);
 
     for (int i = 0; i < 3; i++) {

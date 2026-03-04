@@ -48,7 +48,7 @@ public:
 
     void SetBytesPerLine(int bytes);
     int GetFontSize() const;
-
+    wxString GetHoverAddress() const;
 
     void SetFontSize(int size);
 
@@ -64,7 +64,9 @@ private:
 
     wxPoint GetTextPosition() const;
 
-    wxRect GetContentRect() const; 
+
+
+    wxRect GetContentRect() const;
 
     wxRect GetIndexRect() const;
 

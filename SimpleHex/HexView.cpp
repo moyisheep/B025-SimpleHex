@@ -1,6 +1,5 @@
 #include "HexView.h"
 #include "Colors.h"
-#include "Decoration.h"
 #include <wx/clipbrd.h>
 #include "Debug.h"
 HexView::HexView(wxWindow* parent)
@@ -138,7 +137,12 @@ wxPoint HexView::GetTextPosition() const
         m_columnAddressHeight ); // 留出装饰空间
 }
 
-
+wxString HexView::GetHoverAddress() const
+{
+    std::stringstream ss;
+    ss << std::hex << std::setw(8) << std::setfill('0') << m_hoverIndex << "\n";
+    return ss.str();
+}
 wxRect HexView::GetContentRect() const
 {
     wxSize size = GetClientSize();
@@ -193,7 +197,7 @@ void HexView::RenderBackground(wxMemoryDC& dc, const wxSize& size)
 
     for (int y = 0; y < topRect.height; y++) {
         double ratio = static_cast<double>(y) / topRect.height;
-        wxColor color = AncientDecoration::BlendColors(
+        wxColor color = BlendColors(
             AncientColors::SILK_YELLOW, AncientColors::RICE_PAPER, ratio);
         dc.SetPen(wxPen(color));
         dc.DrawLine(0, y, size.GetWidth(), y);
@@ -201,7 +205,7 @@ void HexView::RenderBackground(wxMemoryDC& dc, const wxSize& size)
 
     for (int y = 0; y < bottomRect.height; y++) {
         double ratio = static_cast<double>(y) / bottomRect.height;
-        wxColor color = AncientDecoration::BlendColors(
+        wxColor color = BlendColors(
             AncientColors::RICE_PAPER, AncientColors::SILK_YELLOW, ratio);
         dc.SetPen(wxPen(color));
         dc.DrawLine(0, bottomRect.y + y, size.GetWidth(), bottomRect.y + y);
@@ -237,8 +241,8 @@ void HexView::RenderTitleHeader(wxDC& dc, const wxString& text, const wxRect& re
     wxRect gradRect = rect;
     gradRect.height = 40;
 
-    wxColour topColor = AncientColors::CELADON_DARK;
-    wxColour bottomColor = AncientColors::CELADON_MID;
+    wxColour topColor = AncientColors::BORDER_OUTER;
+    wxColour bottomColor = AncientColors::BORDER_INNER;
 
     for (int y = 0; y < gradRect.height; y++) {
         double ratio = static_cast<double>(y) / gradRect.height;
@@ -249,7 +253,7 @@ void HexView::RenderTitleHeader(wxDC& dc, const wxString& text, const wxRect& re
     }
 
     // 装饰花纹
-    dc.SetPen(wxPen(AncientColors::VERMILION, 1));
+    dc.SetPen(wxPen(AncientColors::HIGHLIGHT_FOREGROUND_HEX, 1));
     for (int i = 0; i < gradRect.width; i += 30) {
         dc.DrawLine(gradRect.x + i, gradRect.y + gradRect.height - 2,
             gradRect.x + i + 15, gradRect.y + gradRect.height - 2);
@@ -275,18 +279,18 @@ void HexView::RenderTitleHeader(wxDC& dc, const wxString& text, const wxRect& re
 void HexView::RenderBorder(wxDC& dc, const wxRect& rect)
 {
     // 绘制双层边框
-    dc.SetPen(wxPen(AncientColors::CELADON_DARK, 2));
+    dc.SetPen(wxPen(AncientColors::BORDER_OUTER, 2));
     dc.DrawRectangle(rect);
 
     // 内边框
     wxRect innerRect = rect;
     innerRect.Deflate(2);
-    dc.SetPen(wxPen(AncientColors::CELADON_MID, 1));
+    dc.SetPen(wxPen(AncientColors::BORDER_INNER, 1));
     dc.DrawRectangle(innerRect);
 
     // 角落装饰
     int cornerSize = 8;
-    dc.SetPen(wxPen(AncientColors::VERMILION, 2));
+    dc.SetPen(wxPen(AncientColors::HIGHLIGHT_FOREGROUND_HEX, 2));
 
     // 左上角
     dc.DrawLine(rect.x + 5, rect.y, rect.x + cornerSize, rect.y);
@@ -315,7 +319,7 @@ void HexView::RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos)
 
 
     dc.SetFont(m_fonts.Secondary());
-    dc.SetTextForeground(AncientColors::CELADON_DARK);
+    dc.SetTextForeground(AncientColors::BORDER_OUTER);
 
 
     // 偏移地址标题
@@ -337,7 +341,7 @@ void HexView::RenderColumnHeaders(wxMemoryDC& dc, const wxPoint& pos)
 void HexView::RenderSeparator(wxDC& dc, int x, int y, int width)
 {
     // 传统分隔线
-    wxPen pen1(AncientColors::CELADON_DARK, 1);
+    wxPen pen1(AncientColors::BORDER_OUTER, 1);
     wxPen pen2(AncientColors::RICE_PAPER, 1);
 
     for (int i = 0; i < 3; i++) {
@@ -349,7 +353,7 @@ void HexView::RenderColumnAddress(wxMemoryDC& dc, const wxPoint& pos)
 {
 
     dc.SetFont(m_fonts.Primary());
-    dc.SetTextForeground(AncientColors::INK_GRAY);
+    dc.SetTextForeground(AncientColors::HOVER_FOREGROUND);
 
 
     // 十六进制数据
@@ -363,7 +367,7 @@ void HexView::RenderColumnAddress(wxMemoryDC& dc, const wxPoint& pos)
 
         // 字节间分隔点
         if (i < m_bytesPerLine - 1) {
-            dc.SetPen(wxPen(AncientColors::CELADON_MID, 1));
+            dc.SetPen(wxPen(AncientColors::BORDER_INNER, 1));
             dc.DrawPoint(hexX + 
                 i * 3 * m_charWidth + 
                 2 * m_charWidth + 4, 
@@ -396,7 +400,7 @@ void HexView::RenderAddress(wxMemoryDC& dc, size_t offset, int x, int y)
     wxString offsetStr = wxString::Format(wxT("%08X"),
         static_cast<unsigned int>(offset));
     dc.SetFont(m_fonts.Primary());
-    dc.SetTextForeground(AncientColors::INK_GRAY);
+    dc.SetTextForeground(AncientColors::HOVER_FOREGROUND);
     dc.DrawText(offsetStr, x, y);
 }
 
@@ -411,8 +415,8 @@ void HexView::RenderLineHex(wxMemoryDC& dc, size_t offset, int x, int y)
 
         // 高亮选择
         if (m_selection.HasSelection(index)) {
-            dc.SetPen(wxPen(AncientColors::VERMILION, 1));
-            dc.SetBrush(wxBrush(AncientColors::VERMILION.ChangeLightness(180)));
+            dc.SetPen(wxPen(AncientColors::HIGHLIGHT_FOREGROUND_HEX, 1));
+            dc.SetBrush(wxBrush(AncientColors::HIGHLIGHT_FOREGROUND_HEX.ChangeLightness(180)));
             dc.DrawRectangle(x + i * 3 * m_charWidth - 2,
                 y - 1,
                 m_charWidth * 2 + 4,
@@ -422,7 +426,7 @@ void HexView::RenderLineHex(wxMemoryDC& dc, size_t offset, int x, int y)
         // 鼠标悬浮
         if (m_hoverIndex == index)
         {
-            dc.SetPen(wxPen(AncientColors::INK_GRAY, 1));
+            dc.SetPen(wxPen(AncientColors::HOVER_FOREGROUND, 1));
             dc.SetBrush(*wxTRANSPARENT_BRUSH);
             dc.DrawRectangle(x + i * 3 * m_charWidth - 2,
                 y - 1,
@@ -438,7 +442,7 @@ void HexView::RenderLineHex(wxMemoryDC& dc, size_t offset, int x, int y)
 
         // 字节间分隔点
         if (i < m_bytesPerLine - 1) {
-            dc.SetPen(wxPen(AncientColors::CELADON_MID, 1));
+            dc.SetPen(wxPen(AncientColors::BORDER_INNER, 1));
             dc.DrawPoint(x + i * 3 * m_charWidth + 2 * m_charWidth + 4, y + m_charHeight / 2);
         }
     }
@@ -454,9 +458,8 @@ void HexView::RenderLineHexText(wxMemoryDC& dc, size_t offset, int x, int y)
 
         // 高亮选择
         if (m_selection.HasSelection(index)) {
-            dc.SetPen(wxPen(AncientColors::SONG_BLUE, 1));
             dc.SetPen(*wxTRANSPARENT_PEN);
-            dc.SetBrush(wxBrush(AncientColors::SONG_BLUE.ChangeLightness(180)));
+            dc.SetBrush(wxBrush(AncientColors::HIGHLIGHT_BACKGROUND_TEXT.ChangeLightness(180)));
             dc.DrawRectangle(x + i * m_charWidth,
                 y,
                 m_charWidth,
@@ -466,7 +469,7 @@ void HexView::RenderLineHexText(wxMemoryDC& dc, size_t offset, int x, int y)
         // 鼠标悬浮
         if (m_hoverIndex == index)
         {
-            dc.SetPen(wxPen(AncientColors::INK_GRAY, 1));
+            dc.SetPen(wxPen(AncientColors::HOVER_FOREGROUND, 1));
             dc.SetBrush(*wxTRANSPARENT_BRUSH);
             dc.DrawRectangle(x + i * m_charWidth,
                 y,
@@ -476,8 +479,8 @@ void HexView::RenderLineHexText(wxMemoryDC& dc, size_t offset, int x, int y)
 
         wxChar ch = asciiStr[i];
         wxColor color = (ch == wxT('·')) ?
-            AncientColors::INK_LIGHT :
-            AncientColors::INK_BLACK;
+            AncientColors::BYTE_TEXT_NONDISPLAY :
+            AncientColors::BYTE_TEXT_DISPLAY;
 
         dc.SetTextForeground(color);
         dc.DrawText(wxString(ch), x + i * m_charWidth, y);
@@ -507,7 +510,7 @@ void HexView::RenderLine(wxMemoryDC& dc, int lineNum, size_t offset, int y)
 void HexView::RenderEmptyState(wxMemoryDC& dc, const wxSize& size)
 {
     dc.SetFont(m_fonts.Decorative());
-    dc.SetTextForeground(AncientColors::INK_LIGHT);
+    dc.SetTextForeground(AncientColors::BYTE_00);
 
     wxString message = wxT("打开文件以查看十六进制内容");
     wxSize textSize = dc.GetTextExtent(message);
@@ -518,11 +521,11 @@ void HexView::RenderEmptyState(wxMemoryDC& dc, const wxSize& size)
     // 水墨风格文字
     dc.SetTextForeground(wxColor(0, 0, 0, 30));
     dc.DrawText(message, x + 2, y + 2);
-    dc.SetTextForeground(AncientColors::INK_GRAY);
+    dc.SetTextForeground(AncientColors::HOVER_FOREGROUND);
     dc.DrawText(message, x, y);
 
     // 添加传统图案
-    dc.SetPen(wxPen(AncientColors::CELADON_MID, 2));
+    dc.SetPen(wxPen(AncientColors::BORDER_INNER, 2));
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
 
     int patternSize = 60;
@@ -567,11 +570,11 @@ void HexView::DrawCloudPattern(wxMemoryDC& dc, int x, int y, int size)
 
 wxColor HexView::GetByteColor(uint8_t byte) const
 {
-    if (byte == 0x00) return AncientColors::INK_LIGHT;
-    if (byte == 0xFF) return AncientColors::VERMILION;
-    if (byte >= 0x20 && byte <= 0x7E) return AncientColors::BAMBOO_GREEN;
-    if (byte < 0x20) return AncientColors::SONG_BLUE;
-    return AncientColors::LILAC;
+    if (byte == 0x00) return AncientColors::BYTE_00;
+    if (byte == 0xFF) return AncientColors::BYTE_FF;
+    if (byte >= 0x20 && byte <= 0x7E) return AncientColors::BYTE_DISPLAY_CHAR;
+    if (byte < 0x20) return AncientColors::BYTE_CONTROL_CHAR;
+    return AncientColors::BYTE_OTHER;
 }
 
 size_t HexView::PosToIndex(const wxPoint& pos) const
@@ -661,7 +664,8 @@ void HexView::OnMouseMove(wxMouseEvent& event)
         
         
     }
-
+    
+    event.Skip();
 }
 
 void HexView::OnKeyDown(wxKeyEvent& event)
