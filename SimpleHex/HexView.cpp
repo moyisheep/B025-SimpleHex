@@ -146,7 +146,7 @@ wxString HexView::GetHoverAddress() const
 wxRect HexView::GetContentRect() const
 {
     wxSize size = GetClientSize();
-    return wxRect(10, m_titleHeaderHeight, size.GetWidth() - 40, size.GetHeight() - 60);
+    return wxRect(m_padding, m_titleHeaderHeight, size.GetWidth() - m_padding*2, size.GetHeight() - m_titleHeaderHeight - m_padding);
 }
 
 
@@ -215,8 +215,9 @@ void HexView::RenderBackground(wxMemoryDC& dc, const wxSize& size)
     RenderTitleHeader(dc, wxT("古风十六进制查看器"),
         wxRect(0, 0, size.GetWidth(), m_titleHeaderHeight));
 
-    // 内容区域边框
-    RenderBorder(dc, GetContentRect());
+    
+
+    
 
     if(!m_data.IsEmpty())
     {
@@ -226,6 +227,12 @@ void HexView::RenderBackground(wxMemoryDC& dc, const wxSize& size)
 
         // 列地址
         RenderColumnAddress(dc, wxPoint(textPos.x, textPos.y - m_columnHeaderHeight));
+    }
+    else
+    {
+        // 内容区域边框
+        RenderBorder(dc, GetContentRect());
+        //RenderBorder(dc, wxRect(m_padding, m_titleHeaderHeight, size.GetWidth() - m_padding * 2, size.GetHeight() - m_titleHeaderHeight - m_padding));
     }
 }
 wxColor HexView::BlendColors(const wxColor& c1, const wxColor& c2, double ratio)
